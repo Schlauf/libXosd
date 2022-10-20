@@ -15,9 +15,8 @@ main(int argc, char *argv[])
 {
   xosd *osd;
   int a;
-
   osd = xosd_create(2);
-
+  
   if (!osd) {
     printerror();
     return 1;
@@ -30,10 +29,21 @@ main(int argc, char *argv[])
   if (0 != xosd_set_font(osd, (char *) osd_default_font)) {
     printerror();
   }
+  
+//  if (0 != xosd_set_vertical_offset(osd, 100)) {
+//    printerror();
+//  }
+  
+ //if (0 != xosd_set_horizontal_offset(osd, -500)) {
+ //   printerror();
+//  }
+
 
   if (0 != xosd_set_timeout(osd, 2)) {
     printerror();
   }
+  
+  xosd_set_align(osd, XOSD_center);
 
   for (a = 0; a <= 100; a++) {
     if (-1 == xosd_display(osd, 0, XOSD_percentage, a))
@@ -90,24 +100,24 @@ main(int argc, char *argv[])
   if (-1 == xosd_display(osd, 0, XOSD_string, "Blah")) {
     printerror();
   }
+  xosd_monitor(osd, 1);
+
 
   if (0 != xosd_wait_until_no_display(osd)) {
     printerror();
   }
 
-  sleep(2);
-
-  if (-1 == xosd_display(osd, 0, XOSD_string, "blah2")) {
+  if (-1 == xosd_display(osd, 1, XOSD_string, "blah2")) {
     printerror();
   }
-
+  xosd_monitor(osd, 3);
   sleep(1);
 
   if (-1 == xosd_display(osd, 1, XOSD_string, "wibble")) {
     printerror();
   }
-
-  sleep(1);
+  
+  xosd_monitor(osd, 2);
 
   if (0 != xosd_scroll(osd, 1)) {
     printerror();

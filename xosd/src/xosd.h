@@ -56,7 +56,9 @@ extern "C"
  * RETURNS
  *     A new xosd structure.
  */
-  xosd *xosd_create(int number_lines);
+ xosd *xosd_create(int number_lines);
+
+ int xosd_monitor(xosd * osd, int monitor);
 
 /* xosd_init -- Create a new xosd "object" -- deprecated by xosd_create
  *

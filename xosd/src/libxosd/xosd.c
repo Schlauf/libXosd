@@ -743,9 +743,9 @@ xosd_create(int number_lines)
   if (XineramaQueryExtension(osd->display, &dummy_a, &dummy_b) &&
       (screeninfo = XineramaQueryScreens(osd->display, &screens)) &&
       XineramaIsActive(osd->display)) {
-    osd->screen_width = screeninfo[0].width;
-    osd->screen_height = screeninfo[0].height;
-    osd->screen_xpos = screeninfo[0].x_org;
+    osd->screen_width = screeninfo[1].width;
+    osd->screen_height = screeninfo[1].height;
+    osd->screen_xpos = screeninfo[1].x_org;
   } else
 #endif
   {
@@ -827,6 +827,41 @@ error0:
 }
 
 /* }}} */
+
+int xosd_monitor(xosd * osd, int monitor)
+{
+monitor--;
+  #ifdef HAVE_XINERAMA
+    int screens;
+    int dummy_a, dummy_b;
+    XineramaScreenInfo *screeninfo = NULL;
+  #endif
+  FUNCTION_START(Dfunction);
+  if (osd == NULL)
+    return -1;
+
+  _xosd_lock(osd);
+
+  #ifdef HAVE_XINERAMA
+    if (XineramaQueryExtension(osd->display, &dummy_a, &dummy_b) &&
+        (screeninfo = XineramaQueryScreens(osd->display, &screens)) &&
+       XineramaIsActive(osd->display)) {
+     osd->screen_width = screeninfo[monitor].width;
+     osd->screen_height = screeninfo[monitor].height;
+     osd->screen_xpos = screeninfo[monitor].x_org;
+    } else
+  #endif
+  {
+    osd->screen_width = XDisplayWidth(osd->display, osd->screen);
+    osd->screen_height = XDisplayHeight(osd->display, osd->screen);
+    osd->screen_xpos = 0;
+  }
+
+  osd->update |= UPD_pos;
+  _xosd_unlock(osd);
+
+  return 0;
+}
 
 /* xosd_uninit -- Destroy a xosd "object" {{{
  * Deprecated: Use xosd_destroy. */
