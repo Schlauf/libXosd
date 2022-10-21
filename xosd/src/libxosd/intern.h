@@ -114,6 +114,7 @@ struct xosd
   int hoffset;                  /* CONF */
   int voffset;                  /* CONF */
   int shadow_offset;            /* CONF */
+  int shadow_direction;         /* CONF */
   XColor shadow_colour;         /* CONF */
   unsigned long shadow_pixel;   /* CACHE (shadow_colour) */
   int outline_offset;           /* CONF */

@@ -492,20 +492,20 @@ s,@INSTALL_DATA@,${INSTALL} -m 644,;t t
 s,@CYGPATH_W@,echo,;t t
 s,@PACKAGE@,xosd,;t t
 s,@VERSION@,2.2.14,;t t
-s,@ACLOCAL@,${SHELL} /home/e/Desktop/libXosd/xosd/missing --run aclocal-1.9,;t t
-s,@AUTOCONF@,${SHELL} /home/e/Desktop/libXosd/xosd/missing --run autoconf,;t t
-s,@AUTOMAKE@,${SHELL} /home/e/Desktop/libXosd/xosd/missing --run automake-1.9,;t t
-s,@AUTOHEADER@,${SHELL} /home/e/Desktop/libXosd/xosd/missing --run autoheader,;t t
-s,@MAKEINFO@,${SHELL} /home/e/Desktop/libXosd/xosd/missing --run makeinfo,;t t
-s,@install_sh@,/home/e/Desktop/libXosd/xosd/install-sh,;t t
+s,@ACLOCAL@,${SHELL} /home/derrick/Downloads/libXosd/xosd/missing --run aclocal-1.9,;t t
+s,@AUTOCONF@,${SHELL} /home/derrick/Downloads/libXosd/xosd/missing --run autoconf,;t t
+s,@AUTOMAKE@,${SHELL} /home/derrick/Downloads/libXosd/xosd/missing --run automake-1.9,;t t
+s,@AUTOHEADER@,${SHELL} /home/derrick/Downloads/libXosd/xosd/missing --run autoheader,;t t
+s,@MAKEINFO@,${SHELL} /home/derrick/Downloads/libXosd/xosd/missing --run makeinfo,;t t
+s,@install_sh@,/home/derrick/Downloads/libXosd/xosd/install-sh,;t t
 s,@STRIP@,strip,;t t
 s,@ac_ct_STRIP@,strip,;t t
 s,@INSTALL_STRIP_PROGRAM@,${SHELL} $(install_sh) -c -s,;t t
 s,@mkdir_p@,mkdir -p --,;t t
-s,@AWK@,mawk,;t t
+s,@AWK@,gawk,;t t
 s,@SET_MAKE@,,;t t
 s,@am__leading_dot@,.,;t t
-s,@AMTAR@,${SHELL} /home/e/Desktop/libXosd/xosd/missing --run tar,;t t
+s,@AMTAR@,${SHELL} /home/derrick/Downloads/libXosd/xosd/missing --run tar,;t t
 s,@am__tar@,${AMTAR} chof - "$$tardir",;t t
 s,@am__untar@,${AMTAR} xf -,;t t
 s,@LT_CURRENT@,4,;t t
@@ -553,9 +553,9 @@ s,@CXXDEPMODE@,depmode=gcc3,;t t
 s,@am__fastdepCXX_TRUE@,,;t t
 s,@am__fastdepCXX_FALSE@,#,;t t
 s,@CXXCPP@,g++ -E,;t t
-s,@F77@,,;t t
-s,@FFLAGS@,,;t t
-s,@ac_ct_F77@,,;t t
+s,@F77@,f77,;t t
+s,@FFLAGS@,-g,;t t
+s,@ac_ct_F77@,f77,;t t
 s,@LIBTOOL@,$(SHELL) $(top_builddir)/libtool,;t t
 s,@X_CFLAGS@,,;t t
 s,@X_PRE_LIBS@,,;t t

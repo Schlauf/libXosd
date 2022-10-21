@@ -127,7 +127,14 @@ main(int argc, char *argv[])
     printerror();
   }
 
-  sleep(1);
+  xosd * osd2 = xosd_clone(osd);
+  xosd_monitor(osd2, 1);
+  xosd_set_pos(osd2, XOSD_middle);
+  xosd_display(osd2, 1, XOSD_string, "this is a clone");
+  xosd * osd3 = xosd_clone(osd2);
+  xosd_monitor(osd3, 2);
+  xosd_display(osd3, 1, XOSD_string, "this is also a clone");
+  sleep(10);
 
   if (0 != xosd_scroll(osd, 1)) {
     printerror();
@@ -137,6 +144,7 @@ main(int argc, char *argv[])
     printerror();
   }
 
+  sleep(8);
   if (0 != xosd_destroy(osd)) {
     printerror();
   }

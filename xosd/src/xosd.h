@@ -48,6 +48,10 @@ extern "C"
     XOSD_right
   } xosd_align;
 
+/* xosd_clone -- Create a new xosd "object" with the same attributes as the input xosd "object"*/
+xosd *xosd_clone(xosd * osd2);
+
+
 /* xosd_create -- Create a new xosd "object"
  *
  * ARGUMENTS
@@ -215,6 +219,18 @@ extern "C"
  *  -1 on failure
 */
   int xosd_set_shadow_offset(xosd * osd, int shadow_offset);
+
+/* xosd_set_shadow_direction -- Change the direction of the text shadow
+*
+* ARGUMENTS
+*     osd               The xosd "object".  
+*     shadow_direction  The direction of the shadow, in 15 degree increments starting from upwards, from 0 to 7
+*
+* RETURNS
+*   0 on success
+*  -1 on failure
+*/
+  int xosd_set_shadow_direction(xosd * osd, int shadow_direction);
 
 /* xosd_set_outline_offset -- Change the offset of the text outline
  *

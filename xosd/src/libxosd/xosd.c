@@ -223,8 +223,39 @@ draw_text(xosd * osd, int line)
 
   if (osd->shadow_offset) {
     XSetForeground(osd->display, osd->gc, osd->shadow_pixel);
-    _draw_text(osd, l->string, x + osd->shadow_offset,
-               y + osd->shadow_offset);
+    if (osd->shadow_direction) {
+      switch(osd->shadow_direction) {
+        case 0:
+          _draw_text(osd, l->string, x, y - osd->shadow_offset);
+          break;
+        case 1:
+          _draw_text(osd, l->string, x + osd->shadow_offset, y - osd->shadow_offset);
+          break;
+        case 2:
+          _draw_text(osd, l->string, x + osd->shadow_offset, y);
+          break;
+        case 3:
+          _draw_text(osd, l->string, x + osd->shadow_offset, y + osd->shadow_offset);
+          break;
+        case 4:
+          _draw_text(osd, l->string, x, y + osd->shadow_offset);
+          break;
+        case 5:
+          _draw_text(osd, l->string, x - osd->shadow_offset, y + osd->shadow_offset);
+          break;
+        case 6:
+          _draw_text(osd, l->string, x - osd->shadow_offset, y);
+          break;
+        case 7:
+          _draw_text(osd, l->string, x - osd->shadow_offset, y - osd->shadow_offset);
+          break;
+        default:
+          //_draw_text(osd, l->string, x + osd->shadow_offset, y + osd->shadow_offset);
+          break;
+      }
+    } else {
+      _draw_text(osd, l->string, x +osd->shadow_offset, y + osd->shadow_offset);
+    }
   }
   if (osd->outline_offset) {
     int i, j;
@@ -644,6 +675,31 @@ xosd_init(const char *font, const char *colour, int timeout, xosd_pos pos,
 
 /* }}} */
 
+/* xosd_clone -- Create a new xosd "object" with the same attributes as the provided xosd "object" {{{ */
+xosd *
+xosd_clone(xosd * osd2)
+{
+  xosd *osd = xosd_create(osd2->number_lines);
+  osd->align = osd2->align;
+  osd->bar_length = osd2->bar_length;
+  osd->colour = osd2->colour;
+  osd->lines = osd2->lines;
+  osd->pos = osd2->pos;
+  osd->hoffset = osd2->hoffset;
+  osd->voffset = osd2->voffset;
+  osd->shadow_offset = osd2->shadow_offset;
+  osd->shadow_direction = osd2->shadow_direction;
+  osd->shadow_colour = osd2->shadow_colour;
+  osd->outline_colour = osd2->outline_colour;
+  osd->outline_offset = osd2->outline_offset;
+  osd->screen_height = osd2->screen_height;
+  osd->screen_width = osd2->screen_width;
+  osd->screen_xpos = osd2->screen_xpos;
+
+
+}
+
+
 /* xosd_create -- Create a new xosd "object" {{{ */
 xosd *
 xosd_create(int number_lines)
@@ -743,9 +799,9 @@ xosd_create(int number_lines)
   if (XineramaQueryExtension(osd->display, &dummy_a, &dummy_b) &&
       (screeninfo = XineramaQueryScreens(osd->display, &screens)) &&
       XineramaIsActive(osd->display)) {
-    osd->screen_width = screeninfo[1].width;
-    osd->screen_height = screeninfo[1].height;
-    osd->screen_xpos = screeninfo[1].x_org;
+    osd->screen_width = screeninfo[0].width;
+    osd->screen_height = screeninfo[0].height;
+    osd->screen_xpos = screeninfo[0].x_org;
   } else
 #endif
   {
@@ -1179,6 +1235,24 @@ xosd_set_shadow_offset(xosd * osd, int shadow_offset)
 }
 
 /* }}} */
+
+/* xosd_set_shadow_direction -- Change the direction of the text shadow {{{*/
+int
+xosd_set_shadow_direction(xosd * osd, int shadow_direction) 
+{
+  FUNCTION_START(Dfunction);
+  if (osd == NULL)
+    return -1;
+  if ((shadow_direction < 0) || (shadow_direction > 7))
+    return -1;
+  
+  _xosd_lock(osd);
+  osd->shadow_direction = shadow_direction;
+  osd->update |= UPD_font;
+  _xosd_unlock(osd);
+
+  return 0;
+}
 
 /* xosd_set_outline_offset -- Change the offset of the text outline {{{ */
 int

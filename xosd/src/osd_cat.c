@@ -38,6 +38,8 @@ static struct option long_options[] = {
   {"barmode", 1, NULL, 'b'},
   {"percentage", 1, NULL, 'P'},
   {"text", 1, NULL, 'T'},
+  {"direction", 1, NULL, 'D'},
+  {"monitor", 1, NULL, 'm'},
   {NULL, 0, NULL, 0}
 };
 
@@ -63,6 +65,8 @@ int scroll_age = 0;
 struct timeval old_age, new_age;
 int screen_line = 0;
 int lines = 5;
+int direction = 3;
+int monitor = 1;
 xosd_align align = XOSD_left;
 
 int
@@ -74,7 +78,7 @@ main(int argc, char *argv[])
   while (1) {
     int option_index = 0;
     int c =
-      getopt_long(argc, argv, "l:A:a::f:c:d:o:i:s:p:O:S:u:b:P:T:hw",
+      getopt_long(argc, argv, "l:A:a::f:c:d:o:i:s:p:O:S:u:b:P:T:D:m:hw",
                   long_options,
                   &option_index);
     if (c == -1)
@@ -165,12 +169,17 @@ main(int argc, char *argv[])
     case 'T':
       text = optarg;
       break;
-
+    case 'D':
+      direction = atoi(optarg);
+      break;
+    case 'm':
+      monitor = atoi(optarg);
+      break;
     case '?':
     case 'h':
     default:
       fprintf(stderr, "Usage: %s [OPTION] [FILE]...\n", argv[0]);
-      fprintf(stderr, "Version: %s\n", XOSD_VERSION);
+      //fprintf(stderr, "Version: %s\n", XOSD_VERSION);
       fprintf(stderr,
           "Display FILE, or standard input, on top of display.\n"
           "\n"
@@ -205,6 +214,10 @@ main(int argc, char *argv[])
           "  -P, --percentage=PERCENTAGE\n"
           "                      The length of the percentage bar / slider position (0 to 100).\n"
           "  -T, --text=TEXT     The text to get displayed above the percentage bar.\n"
+          "  -D, --direction=DIRECTION\n"
+          "                      The direction the shadow will cast.\n"
+          "  -m, --monitor=MONITOR\n"
+          "                      Which monitor the text will be displayed on. Monitor one is default."
           "\n\n"
           "With no FILE, or when FILE is -, read standard input.\n");
       return EXIT_SUCCESS;
@@ -230,6 +243,8 @@ main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
   xosd_set_shadow_offset(osd, shadow);
+  xosd_monitor(osd, monitor);
+  xosd_set_shadow_direction(osd, direction);
   if (shadow_colour) xosd_set_shadow_colour(osd, shadow_colour);
   xosd_set_outline_offset(osd, outline_offset);
   if (outline_colour) xosd_set_outline_colour(osd, outline_colour);
