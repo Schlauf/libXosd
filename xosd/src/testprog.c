@@ -30,6 +30,8 @@ main(int argc, char *argv[])
     printerror();
   }
   
+
+
 //  if (0 != xosd_set_vertical_offset(osd, 100)) {
 //    printerror();
 //  }
@@ -44,7 +46,8 @@ main(int argc, char *argv[])
   }
   
   xosd_set_align(osd, XOSD_center);
-
+  xosd_set_pos(osd, XOSD_top);
+  display_info();
   for (a = 0; a <= 100; a++) {
     if (-1 == xosd_display(osd, 0, XOSD_percentage, a))
       printerror();
@@ -92,17 +95,13 @@ main(int argc, char *argv[])
   if (-1 == xosd_display(osd, 0, XOSD_slider, 36)) {
     printerror();
   }
-
   if (0 != xosd_wait_until_no_display(osd)) {
     printerror();
   }
-
   if (-1 == xosd_display(osd, 0, XOSD_string, "Blah")) {
     printerror();
   }
   xosd_monitor(osd, 1);
-
-
   if (0 != xosd_wait_until_no_display(osd)) {
     printerror();
   }
@@ -111,12 +110,15 @@ main(int argc, char *argv[])
     printerror();
   }
   xosd_monitor(osd, 3);
-  sleep(1);
-
+        if (0 != xosd_wait_until_no_display(osd)) {
+    printerror();
+  }
   if (-1 == xosd_display(osd, 1, XOSD_string, "wibble")) {
     printerror();
   }
-  
+    if (0 != xosd_wait_until_no_display(osd)) {
+    printerror();
+  }
   xosd_monitor(osd, 2);
 
   if (0 != xosd_scroll(osd, 1)) {
@@ -127,13 +129,20 @@ main(int argc, char *argv[])
     printerror();
   }
 
-  xosd * osd2 = xosd_clone(osd);
-  xosd_monitor(osd2, 1);
-  xosd_set_pos(osd2, XOSD_middle);
-  xosd_display(osd2, 1, XOSD_string, "this is a clone");
-  xosd * osd3 = xosd_clone(osd2);
-  xosd_monitor(osd3, 2);
-  xosd_display(osd3, 1, XOSD_string, "this is also a clone");
+
+  if (0 != xosd_wait_until_no_display(osd)) {
+    printerror();
+  }
+
+  for (int i = 0; i < screen_count(); i++) {
+ 	xosd * osd2 = xosd_clone(osd);
+ 	xosd_set_timeout(osd2, 10);
+  	xosd_monitor(osd2, i+1);
+  	xosd_set_pos(osd2, XOSD_middle);
+  	xosd_set_align(osd2, XOSD_center);
+  	xosd_display(osd2, 1, XOSD_string, "this is a clone");
+  }
+
   sleep(10);
 
   if (0 != xosd_scroll(osd, 1)) {
@@ -144,7 +153,6 @@ main(int argc, char *argv[])
     printerror();
   }
 
-  sleep(8);
   if (0 != xosd_destroy(osd)) {
     printerror();
   }

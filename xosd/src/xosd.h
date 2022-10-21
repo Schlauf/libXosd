@@ -63,6 +63,10 @@ xosd *xosd_clone(xosd * osd2);
  xosd *xosd_create(int number_lines);
 
  int xosd_monitor(xosd * osd, int monitor);
+ 
+ int display_info();
+ 
+ int screen_count();
 
 /* xosd_init -- Create a new xosd "object" -- deprecated by xosd_create
  *
