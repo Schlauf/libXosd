@@ -33,6 +33,11 @@ const char *osd_default_colour = "green";
 /** Global error string. */
 char *xosd_error;
 
+/* Number of screens on X11 connection */
+#ifdef HAVE_XINERAMA
+int nscreens;
+XineramaScreenInfo *screeninfo = NULL;
+#endif
 /* Wait until display is in next state. {{{ */
 static void
 _wait_until_update(xosd * osd, int generation)
@@ -675,7 +680,7 @@ xosd_init(const char *font, const char *colour, int timeout, xosd_pos pos,
 
 /* }}} */
 
-/* xosd_clone -- Create a new xosd "object" with the same attributes as the provided xosd "object" {{{ */
+/* xosd_ -- Create a new xosd "object" with the same attributes as the provided xosd "object" {{{ */
 xosd *
 xosd_clone(xosd * osd2)
 {
@@ -683,7 +688,7 @@ xosd_clone(xosd * osd2)
   osd->align = osd2->align;
   osd->bar_length = osd2->bar_length;
   osd->colour = osd2->colour;
-  osd->lines = osd2->lines;
+//  osd->lines = osd2->lines;
   osd->pos = osd2->pos;
   osd->hoffset = osd2->hoffset;
   osd->voffset = osd2->voffset;
@@ -710,9 +715,7 @@ xosd_create(int number_lines)
   XSetWindowAttributes setwinattr;
   XGCValues xgcv = { .graphics_exposures = False };
 #ifdef HAVE_XINERAMA
-  int screens;
   int dummy_a, dummy_b;
-  XineramaScreenInfo *screeninfo = NULL;
 #endif
 
   FUNCTION_START(Dfunction);
@@ -797,7 +800,7 @@ xosd_create(int number_lines)
   DEBUG(Dtrace, "width and height initialization");
 #ifdef HAVE_XINERAMA
   if (XineramaQueryExtension(osd->display, &dummy_a, &dummy_b) &&
-      (screeninfo = XineramaQueryScreens(osd->display, &screens)) &&
+      (screeninfo = XineramaQueryScreens(osd->display, &nscreens)) &&
       XineramaIsActive(osd->display)) {
     osd->screen_width = screeninfo[0].width;
     osd->screen_height = screeninfo[0].height;
@@ -809,10 +812,10 @@ xosd_create(int number_lines)
     osd->screen_height = XDisplayHeight(osd->display, osd->screen);
     osd->screen_xpos = 0;
   }
-#ifdef HAVE_XINERAMA
-  if (screeninfo)
-    XFree(screeninfo);
-#endif
+//#ifdef HAVE_XINERAMA
+//  if (screeninfo)
+//    XFree(screeninfo);
+//#endif
   osd->line_height = 10 /*Dummy value */ ;
   osd->height = osd->line_height * osd->number_lines;
 
@@ -900,7 +903,7 @@ monitor--;
 
   #ifdef HAVE_XINERAMA
     if (XineramaQueryExtension(osd->display, &dummy_a, &dummy_b) &&
-        (screeninfo = XineramaQueryScreens(osd->display, &screens)) &&
+        (screeninfo = XineramaQueryScreens(osd->display, &nscreens)) &&
        XineramaIsActive(osd->display)) {
      osd->screen_width = screeninfo[monitor].width;
      osd->screen_height = screeninfo[monitor].height;
@@ -917,6 +920,60 @@ monitor--;
   _xosd_unlock(osd);
 
   return 0;
+}
+
+void* osd_split() {
+  int i = 1;
+  char word[256];
+  xosd *osd;
+  osd = xosd_create(2);
+  FUNCTION_START(Dfunction);
+
+  xosd_set_outline_offset(osd, 1);
+  xosd_set_timeout(osd, 1);
+  xosd_set_font(osd, (char *) osd_default_font);
+    
+  for (int i = 0; i < nscreens; i++) {
+    xosd * osd2 = xosd_clone(osd);
+    xosd_monitor(osd2, i+1);
+    xosd_set_align(osd2, XOSD_center);
+    xosd_set_pos(osd2, XOSD_middle);
+    sprintf(word, "%d", i+1);
+    xosd_display(osd2, 0, XOSD_string, word);
+ 
+    xosd * osd3 = xosd_clone(osd);
+    xosd_monitor(osd3, i+1);
+    xosd_set_align(osd3, XOSD_left);
+    xosd_set_pos(osd3, XOSD_top);
+    sprintf(word, "%d", screeninfo[i].width);
+    xosd_display(osd3, 0, XOSD_string, word);
+    
+    xosd * osd4 = xosd_clone(osd);
+    xosd_monitor(osd4, i+1);
+    xosd_set_align(osd4, XOSD_right);
+    xosd_set_pos(osd4, XOSD_top);
+    sprintf(word, "%d", screeninfo[i].height);
+    xosd_display(osd4, 0, XOSD_string, word);
+    if (i == nscreens) {
+      xosd_wait_until_no_display(osd4);
+    }
+  }
+
+  pthread_exit(&i);
+}
+
+int display_info()
+{
+  pthread_t id;
+  int i = 1;
+  int* ptr;
+  pthread_create(&id, NULL, osd_split, &i);
+  pthread_join(id, (void**)&ptr);
+  return 1;
+}
+
+int screen_count(){
+  return nscreens;
 }
 
 /* xosd_uninit -- Destroy a xosd "object" {{{
