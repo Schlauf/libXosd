@@ -36,7 +36,6 @@ char *xosd_error;
 /* Number of screens on X11 connection */
 #ifdef HAVE_XINERAMA
 int nscreens;
-XineramaScreenInfo *screeninfo = NULL;
 #endif
 /* Wait until display is in next state. {{{ */
 static void
@@ -688,7 +687,9 @@ xosd_clone(xosd * osd2)
   osd->align = osd2->align;
   osd->bar_length = osd2->bar_length;
   osd->colour = osd2->colour;
-//  osd->lines = osd2->lines;
+
+/* Copying original lines to the cloned xosd instance causes unintuitive behaviour
+  osd->lines = osd2->lines; */
   osd->pos = osd2->pos;
   osd->hoffset = osd2->hoffset;
   osd->voffset = osd2->voffset;
@@ -701,7 +702,7 @@ xosd_clone(xosd * osd2)
   osd->screen_width = osd2->screen_width;
   osd->screen_xpos = osd2->screen_xpos;
 
-
+  return osd;
 }
 
 
@@ -714,9 +715,6 @@ xosd_create(int number_lines)
   char *display;
   XSetWindowAttributes setwinattr;
   XGCValues xgcv = { .graphics_exposures = False };
-#ifdef HAVE_XINERAMA
-  int dummy_a, dummy_b;
-#endif
 
   FUNCTION_START(Dfunction);
   DEBUG(Dtrace, "getting display");
@@ -798,24 +796,9 @@ xosd_create(int number_lines)
   }
 
   DEBUG(Dtrace, "width and height initialization");
-#ifdef HAVE_XINERAMA
-  if (XineramaQueryExtension(osd->display, &dummy_a, &dummy_b) &&
-      (screeninfo = XineramaQueryScreens(osd->display, &nscreens)) &&
-      XineramaIsActive(osd->display)) {
-    osd->screen_width = screeninfo[0].width;
-    osd->screen_height = screeninfo[0].height;
-    osd->screen_xpos = screeninfo[0].x_org;
-  } else
-#endif
-  {
-    osd->screen_width = XDisplayWidth(osd->display, osd->screen);
-    osd->screen_height = XDisplayHeight(osd->display, osd->screen);
-    osd->screen_xpos = 0;
-  }
-//#ifdef HAVE_XINERAMA
-//  if (screeninfo)
-//    XFree(screeninfo);
-//#endif
+
+  xosd_monitor(osd, 1);
+
   osd->line_height = 10 /*Dummy value */ ;
   osd->height = osd->line_height * osd->number_lines;
 
@@ -887,17 +870,19 @@ error0:
 
 /* }}} */
 
-int xosd_monitor(xosd * osd, int monitor)
+/* xosd_monitor -- swap the input xosd window's monitor parameters to correspond with desired screen */
+int 
+xosd_monitor(xosd * osd, int monitor)
 {
 monitor--;
-  #ifdef HAVE_XINERAMA
-    int screens;
-    int dummy_a, dummy_b;
-    XineramaScreenInfo *screeninfo = NULL;
-  #endif
-  FUNCTION_START(Dfunction);
   if (osd == NULL)
     return -1;
+    
+  #ifdef HAVE_XINERAMA
+    XineramaScreenInfo *screeninfo = NULL;
+    int dummy_a, dummy_b;
+  #endif
+  FUNCTION_START(Dfunction);
 
   _xosd_lock(osd);
 
@@ -908,6 +893,7 @@ monitor--;
      osd->screen_width = screeninfo[monitor].width;
      osd->screen_height = screeninfo[monitor].height;
      osd->screen_xpos = screeninfo[monitor].x_org;
+
     } else
   #endif
   {
@@ -915,68 +901,95 @@ monitor--;
     osd->screen_height = XDisplayHeight(osd->display, osd->screen);
     osd->screen_xpos = 0;
   }
-
+  #ifdef HAVE_XINERAMA
+    if (screeninfo)
+      XFree(screeninfo);
+  #endif
   osd->update |= UPD_pos;
   _xosd_unlock(osd);
 
   return 0;
 }
 
-void* osd_split() {
+/* }}} */
+
+/* osd_split -- main for pthreads in display_info */
+void* 
+osd_split() 
+{
   int i = 1;
   char word[256];
-  xosd *osd;
-  osd = xosd_create(2);
+  xosd * osd = malloc(sizeof(xosd*)*nscreens*3);
+  xosd ** osdptr = malloc(sizeof(xosd)*nscreens*3);
+  for (int i = 0; i < nscreens*3+1; i++) {
+    osdptr[i] = osd+i;
+  }
+  osdptr[0] = xosd_create(2);
+  if (osdptr[0] == NULL)
+    return NULL;
+ 
   FUNCTION_START(Dfunction);
 
-  xosd_set_outline_offset(osd, 1);
-  xosd_set_timeout(osd, 1);
-  xosd_set_font(osd, (char *) osd_default_font);
+  xosd_set_outline_offset(osdptr[0], 1);
+  xosd_set_timeout(osdptr[0], 1);
+  xosd_set_font(osdptr[0], (char *) osd_default_font);
     
   for (int i = 0; i < nscreens; i++) {
-    xosd * osd2 = xosd_clone(osd);
-    xosd_monitor(osd2, i+1);
-    xosd_set_align(osd2, XOSD_center);
-    xosd_set_pos(osd2, XOSD_middle);
+    osdptr[3*i] = xosd_clone(osdptr[0]);
+    xosd_monitor(osdptr[3*i], i+1);
+    xosd_set_align(osdptr[3*i], XOSD_center);
+    xosd_set_pos(osdptr[3*i], XOSD_middle);
     sprintf(word, "%d", i+1);
-    xosd_display(osd2, 0, XOSD_string, word);
+    xosd_display(osdptr[3*i], 0, XOSD_string, word);
  
-    xosd * osd3 = xosd_clone(osd);
-    xosd_monitor(osd3, i+1);
-    xosd_set_align(osd3, XOSD_left);
-    xosd_set_pos(osd3, XOSD_top);
-    sprintf(word, "%d", screeninfo[i].width);
-    xosd_display(osd3, 0, XOSD_string, word);
+    osdptr[3*i+1] = xosd_clone(osdptr[0]);
+    xosd_monitor(osdptr[3*i+1], i+1);
+    xosd_set_align(osdptr[3*i+1], XOSD_left);
+    xosd_set_pos(osdptr[3*i+1], XOSD_top);
+    sprintf(word, "%d", osdptr[i]->screen_width);
+    xosd_display(osdptr[3*i+1], 0, XOSD_string, word);
     
-    xosd * osd4 = xosd_clone(osd);
-    xosd_monitor(osd4, i+1);
-    xosd_set_align(osd4, XOSD_right);
-    xosd_set_pos(osd4, XOSD_top);
-    sprintf(word, "%d", screeninfo[i].height);
-    xosd_display(osd4, 0, XOSD_string, word);
-    if (i == nscreens) {
-      xosd_wait_until_no_display(osd4);
-    }
+    osdptr[3*i+2] = xosd_clone(osdptr[0]);
+    xosd_monitor(osdptr[3*i+2], i+1);
+    xosd_set_align(osdptr[3*i+2], XOSD_right);
+    xosd_set_pos(osdptr[3*i+2], XOSD_top);
+    sprintf(word, "%d", osdptr[3*i+2]->screen_height);
+    xosd_display(osdptr[3*i+2], 0, XOSD_string, word);
   }
+  sleep(15);
+  for (int i = 0; i < nscreens*3; i++) {
+    xosd_destroy(osdptr[i]);    
+  }
+  free(osd);
+  free(osdptr);
 
   pthread_exit(&i);
 }
 
-int display_info()
+/* }}} */
+
+/* display_info -- graphically displays screen parameters */
+int 
+display_info()
 {
   pthread_t id;
   int i = 1;
-  int* ptr;
   pthread_create(&id, NULL, osd_split, &i);
-  pthread_join(id, (void**)&ptr);
   return 1;
 }
 
-int screen_count(){
+/* }}} */
+
+/* display_info -- returns the number of screens on the X11 connection which is required for development of extensible programs */
+int 
+screen_count()
+{
   return nscreens;
 }
 
-/* xosd_uninit -- Destroy a xosd "object" {{{
+/* }}} */
+
+/* xosd_uninit -- Destroy an xosd "object" {{{
  * Deprecated: Use xosd_destroy. */
 int
 xosd_uninit(xosd * osd)
@@ -987,7 +1000,7 @@ xosd_uninit(xosd * osd)
 
 /* }}} */
 
-/* xosd_destroy -- Destroy a xosd "object" {{{ */
+/* xosd_destroy -- Destroy an xosd "object" {{{ */
 int
 xosd_destroy(xosd * osd)
 {
