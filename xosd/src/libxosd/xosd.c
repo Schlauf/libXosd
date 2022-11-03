@@ -1148,8 +1148,9 @@ xosd_display(xosd * osd, int line, xosd_command command, ...)
 int
 xosd_is_onscreen(xosd * osd)
 {
-  FUNCTION_START(Dfunction);
   int return_val = -1;
+
+  FUNCTION_START(Dfunction);
   if (osd != NULL) {
     return_val = osd->generation & 1;
   }
@@ -1165,6 +1166,7 @@ xosd_wait_until_no_display(xosd * osd)
 {
   int generation;
   int return_val = -1;
+
   FUNCTION_START(Dfunction);
   if (osd != NULL) {
     return_val = 0;
@@ -1173,6 +1175,7 @@ xosd_wait_until_no_display(xosd * osd)
 
     FUNCTION_END(Dfunction);
   }
+
   return return_val;
 }
 
@@ -1182,18 +1185,17 @@ xosd_wait_until_no_display(xosd * osd)
 int
 xosd_set_colour(xosd * osd, const char *colour)
 {
-  int retval = 0;
+  int return_val = -1;
 
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  if (osd != NULL) {
+    _xosd_lock(osd);
+    return_val = parse_colour(osd, &osd->colour, &osd->pixel, colour);
+    osd->update |= UPD_lines;
+    _xosd_unlock(osd);
+  }
 
-  _xosd_lock(osd);
-  retval = parse_colour(osd, &osd->colour, &osd->pixel, colour);
-  osd->update |= UPD_lines;
-  _xosd_unlock(osd);
-
-  return retval;
+  return return_val;
 }
 
 /* }}} */
@@ -1202,18 +1204,17 @@ xosd_set_colour(xosd * osd, const char *colour)
 int
 xosd_set_shadow_colour(xosd * osd, const char *colour)
 {
-  int retval = 0;
+  int return_val = -1;
 
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  if (osd != NULL) {
+    _xosd_lock(osd);
+    return_val = parse_colour(osd, &osd->shadow_colour, &osd->shadow_pixel, colour);
+    osd->update |= UPD_lines;
+    _xosd_unlock(osd);
+  }
 
-  _xosd_lock(osd);
-  retval = parse_colour(osd, &osd->shadow_colour, &osd->shadow_pixel, colour);
-  osd->update |= UPD_lines;
-  _xosd_unlock(osd);
-
-  return retval;
+  return return_val;
 }
 
 /* }}} */
@@ -1222,19 +1223,18 @@ xosd_set_shadow_colour(xosd * osd, const char *colour)
 int
 xosd_set_outline_colour(xosd * osd, const char *colour)
 {
-  int retval = 0;
+  int return_val = -1;
 
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  if (osd != NULL) {
+    _xosd_lock(osd);
+    return_val =
+      parse_colour(osd, &osd->outline_colour, &osd->outline_pixel, colour);
+    osd->update |= UPD_lines;
+    _xosd_unlock(osd);
+  }
 
-  _xosd_lock(osd);
-  retval =
-    parse_colour(osd, &osd->outline_colour, &osd->outline_pixel, colour);
-  osd->update |= UPD_lines;
-  _xosd_unlock(osd);
-
-  return retval;
+  return return_val;
 }
 
 /* }}} */
@@ -1248,32 +1248,30 @@ xosd_set_font(xosd * osd, const char *font)
   char **missing;
   int nmissing;
   char *defstr;
-  int ret = 0;
+  int return_val = -1;
 
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
-  if (font == NULL)
-    return -1;
-
-  /*
-   * Try to create the new font. If it doesn't succeed, keep old font. 
-   */
-  _xosd_lock(osd);
-  fontset2 = XCreateFontSet(osd->display, font, &missing, &nmissing, &defstr);
-  XFreeStringList(missing);
-  if (fontset2 == NULL) {
-    xosd_error = "Requested font not found";
-    ret = -1;
-  } else {
-    if (osd->fontset != NULL)
-      XFreeFontSet(osd->display, osd->fontset);
-    osd->fontset = fontset2;
-    osd->update |= UPD_font;
+  if (osd != NULL && font != NULL) {
+    /*
+    * Try to create the new font. If it doesn't succeed, keep old font. 
+    */
+    _xosd_lock(osd);
+    fontset2 = XCreateFontSet(osd->display, font, &missing, &nmissing, &defstr);
+    XFreeStringList(missing);
+    if (fontset2 == NULL) {
+      xosd_error = "Requested font not found";
+      return_val = -1;
+    } else {
+      if (osd->fontset != NULL)
+        XFreeFontSet(osd->display, osd->fontset);
+      osd->fontset = fontset2;
+      osd->update |= UPD_font;
+      return_val = 0;
+    }
+    _xosd_unlock(osd);
   }
-  _xosd_unlock(osd);
 
-  return ret;
+  return return_val;
 }
 
 /* }}} */
@@ -1282,18 +1280,18 @@ xosd_set_font(xosd * osd, const char *font)
 int
 xosd_set_shadow_offset(xosd * osd, int shadow_offset)
 {
+  int return_val = -1;
+
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
-  if (shadow_offset < 0)
-    return -1;
+  if (osd != NULL && shadow_offset > 0) {
+    _xosd_lock(osd);
+    osd->shadow_offset = shadow_offset;
+    osd->update |= UPD_font;
+    _xosd_unlock(osd);
+    return_val = 0;
+  }
 
-  _xosd_lock(osd);
-  osd->shadow_offset = shadow_offset;
-  osd->update |= UPD_font;
-  _xosd_unlock(osd);
-
-  return 0;
+  return return_val;
 }
 
 /* }}} */
@@ -1302,36 +1300,36 @@ xosd_set_shadow_offset(xosd * osd, int shadow_offset)
 int
 xosd_set_shadow_direction(xosd * osd, int shadow_direction) 
 {
-  FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
-  if ((shadow_direction < 0) || (shadow_direction > 7))
-    return -1;
-  
-  _xosd_lock(osd);
-  osd->shadow_direction = shadow_direction;
-  osd->update |= UPD_font;
-  _xosd_unlock(osd);
+  int return_val = -1;
 
-  return 0;
+  FUNCTION_START(Dfunction);
+  if (osd != NULL && (shadow_direction >= 0 && shadow_direction < 7)) {
+    _xosd_lock(osd);
+    osd->shadow_direction = shadow_direction;
+    osd->update |= UPD_font;
+    _xosd_unlock(osd);
+    return_val = 0;
+  }
+
+  return return_val;
 }
 
 /* xosd_set_outline_offset -- Change the offset of the text outline {{{ */
 int
 xosd_set_outline_offset(xosd * osd, int outline_offset)
 {
+  int return_val = -1;
+
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
-  if (outline_offset < 0)
-    return -1;
+  if (osd != NULL && outline_offset >= 0) {
+    _xosd_lock(osd);
+    osd->outline_offset = outline_offset;
+    osd->update |= UPD_font;
+    _xosd_unlock(osd);
+    return_val = 0;
+  }
 
-  _xosd_lock(osd);
-  osd->outline_offset = outline_offset;
-  osd->update |= UPD_font;
-  _xosd_unlock(osd);
-
-  return 0;
+  return return_val;
 }
 
 /* }}} */
@@ -1340,16 +1338,18 @@ xosd_set_outline_offset(xosd * osd, int outline_offset)
 int
 xosd_set_vertical_offset(xosd * osd, int voffset)
 {
+  int return_val = -1;
+
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  if (osd != NULL) {
+    _xosd_lock(osd);
+    osd->voffset = voffset;
+    osd->update |= UPD_pos;
+    _xosd_unlock(osd);
+    return_val = 0;
+  }
 
-  _xosd_lock(osd);
-  osd->voffset = voffset;
-  osd->update |= UPD_pos;
-  _xosd_unlock(osd);
-
-  return 0;
+  return return_val;
 }
 
 /* }}} */
@@ -1358,16 +1358,18 @@ xosd_set_vertical_offset(xosd * osd, int voffset)
 int
 xosd_set_horizontal_offset(xosd * osd, int hoffset)
 {
+  int return_val = -1;
+
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  if (osd != NULL) {
+    _xosd_lock(osd);
+    osd->hoffset = hoffset;
+    osd->update |= UPD_pos;
+    _xosd_unlock(osd);
+    return_val = 0;
+  }
 
-  _xosd_lock(osd);
-  osd->hoffset = hoffset;
-  osd->update |= UPD_pos;
-  _xosd_unlock(osd);
-
-  return 0;
+  return return_val;
 }
 
 /* }}} */
@@ -1376,16 +1378,18 @@ xosd_set_horizontal_offset(xosd * osd, int hoffset)
 int
 xosd_set_pos(xosd * osd, xosd_pos pos)
 {
+  int return_val = -1;
+
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  if (osd != NULL) {
+    _xosd_lock(osd);
+    osd->pos = pos;
+    osd->update |= UPD_pos;
+    _xosd_unlock(osd);
+    return_val = 0;
+  }
 
-  _xosd_lock(osd);
-  osd->pos = pos;
-  osd->update |= UPD_pos;
-  _xosd_unlock(osd);
-
-  return 0;
+  return return_val;
 }
 
 /* }}} */
@@ -1394,16 +1398,18 @@ xosd_set_pos(xosd * osd, xosd_pos pos)
 int
 xosd_set_align(xosd * osd, xosd_align align)
 {
+  int return_val = -1;
+
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  if (osd != NULL) {
+    _xosd_lock(osd);
+    osd->align = align;
+    osd->update |= UPD_content;   /* XOSD_right depends on text width */
+    _xosd_unlock(osd);
+    return_val = 0;
+  }
 
-  _xosd_lock(osd);
-  osd->align = align;
-  osd->update |= UPD_content;   /* XOSD_right depends on text width */
-  _xosd_unlock(osd);
-
-  return 0;
+  return return_val;
 }
 
 /* }}} */
@@ -1412,18 +1418,21 @@ xosd_set_align(xosd * osd, xosd_align align)
 int
 xosd_get_colour(xosd * osd, int *red, int *green, int *blue)
 {
+  int return_val = -1;
+
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  if (osd != NULL) {
+    if (red)
+      *red = osd->colour.red;
+    if (blue)
+      *blue = osd->colour.blue;
+    if (green)
+      *green = osd->colour.green;
 
-  if (red)
-    *red = osd->colour.red;
-  if (blue)
-    *blue = osd->colour.blue;
-  if (green)
-    *green = osd->colour.green;
+    return_val = 0;
+}
 
-  return 0;
+  return return_val;
 }
 
 /* }}} */
@@ -1432,14 +1441,18 @@ xosd_get_colour(xosd * osd, int *red, int *green, int *blue)
 int
 xosd_set_timeout(xosd * osd, int timeout)
 {
+  int return_val = -1;
+
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
-  _xosd_lock(osd);
-  osd->timeout = timeout;
-  osd->update |= UPD_timer;
-  _xosd_unlock(osd);
-  return 0;
+  if (osd != NULL) {
+    _xosd_lock(osd);
+    osd->timeout = timeout;
+    osd->update |= UPD_timer;
+    _xosd_unlock(osd);
+    return_val = 0;
+  }
+
+  return return_val;
 }
 
 /* }}} */
@@ -1448,18 +1461,20 @@ xosd_set_timeout(xosd * osd, int timeout)
 int
 xosd_hide(xosd * osd)
 {
-  FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  int return_val = -1;
 
-  if (osd->generation & 1) {
-    _xosd_lock(osd);
-    osd->update &= ~UPD_show;
-    osd->update |= UPD_hide;
-    _xosd_unlock(osd);
-    return 0;
+  FUNCTION_START(Dfunction);
+  if (osd != NULL) {
+    if (osd->generation & 1) {
+      _xosd_lock(osd);
+      osd->update &= ~UPD_show;
+      osd->update |= UPD_hide;
+      _xosd_unlock(osd);
+      return_val = 0;
+    }
   }
-  return -1;
+
+  return return_val;
 }
 
 /* }}} */
@@ -1468,18 +1483,20 @@ xosd_hide(xosd * osd)
 int
 xosd_show(xosd * osd)
 {
-  FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  int return_val = -1;
 
-  if (~osd->generation & 1) {
-    _xosd_lock(osd);
-    osd->update &= ~UPD_hide;
-    osd->update |= UPD_show | UPD_timer;
-    _xosd_unlock(osd);
-    return 0;
+  FUNCTION_START(Dfunction);
+  if (osd != NULL) {
+    if (~osd->generation & 1) {
+      _xosd_lock(osd);
+      osd->update &= ~UPD_hide;
+      osd->update |= UPD_show | UPD_timer;
+      _xosd_unlock(osd);
+      return_val = 0;
+    }
   }
-  return -1;
+
+  return return_val;
 }
 
 /* }}} */
@@ -1490,31 +1507,31 @@ xosd_scroll(xosd * osd, int lines)
 {
   int i;
   union xosd_line *src, *dst;
+  int return_val = -1;
 
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
-  if (lines <= 0 || lines > osd->number_lines)
-    return -1;
-
-  _xosd_lock(osd);
-  /* Clear old text */
-  for (i = 0, src = osd->lines; i < lines; i++, src++)
-    if (src->type == LINE_text && src->text.string) {
-      free(src->text.string);
-      src->text.string = NULL;
+  if (osd != NULL && (lines > 0 && lines <= osd->number_lines)) {
+    _xosd_lock(osd);
+    /* Clear old text */
+    for (i = 0, src = osd->lines; i < lines; i++, src++)
+      if (src->type == LINE_text && src->text.string) {
+        free(src->text.string);
+        src->text.string = NULL;
+      }
+    /* Move following lines forward */
+    for (dst = osd->lines; i < osd->number_lines; i++)
+      *dst++ = *src++;
+    /* Blank new lines */
+    for (; dst < src; dst++) {
+      dst->type = LINE_blank;
+      dst->text.string = NULL;
     }
-  /* Move following lines forward */
-  for (dst = osd->lines; i < osd->number_lines; i++)
-    *dst++ = *src++;
-  /* Blank new lines */
-  for (; dst < src; dst++) {
-    dst->type = LINE_blank;
-    dst->text.string = NULL;
+    osd->update |= UPD_content;
+    _xosd_unlock(osd);
+    return_val = 0;
   }
-  osd->update |= UPD_content;
-  _xosd_unlock(osd);
-  return 0;
+
+  return return_val;
 }
 
 /* }}} */
@@ -1523,11 +1540,13 @@ xosd_scroll(xosd * osd, int lines)
 int
 xosd_get_number_lines(xosd * osd)
 {
+  int return_val = -1;
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
-
-  return osd->number_lines;
+  if (osd != NULL) {
+    return_val = osd->number_lines;
+  }
+    
+  return return_val;
 }
 
 /* }}} */
