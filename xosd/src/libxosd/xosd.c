@@ -73,9 +73,10 @@ _xosd_lock(xosd * osd)
 {
   char c = 0;
   FUNCTION_START(Dlocking);
-  write(osd->pipefd[1], &c, sizeof(c));
-  pthread_mutex_lock(&osd->mutex);
-  FUNCTION_END(Dlocking);
+  if (write(osd->pipefd[1], &c, sizeof(c)) != -1) {
+    pthread_mutex_lock(&osd->mutex);
+  }
+    FUNCTION_END(Dlocking);
 }
 static /*inline */ void
 _xosd_unlock(xosd * osd)
@@ -83,11 +84,12 @@ _xosd_unlock(xosd * osd)
   char c;
   int generation = osd->generation, update = osd->update;
   FUNCTION_START(Dlocking);
-  read(osd->pipefd[0], &c, sizeof(c));
-  pthread_cond_signal(&osd->cond_wait);
-  pthread_mutex_unlock(&osd->mutex);
-  if (update & UPD_show)
-    _wait_until_update(osd, generation & ~1); /* no wait when already shown. */
+  if (read(osd->pipefd[0], &c, sizeof(c)) != -1) {
+    pthread_cond_signal(&osd->cond_wait);
+    pthread_mutex_unlock(&osd->mutex);
+    if (update & UPD_show)
+      _wait_until_update(osd, generation & ~1); /* no wait when already shown. */
+  }
   FUNCTION_END(Dlocking);
 }
 
