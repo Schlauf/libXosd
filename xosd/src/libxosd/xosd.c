@@ -727,13 +727,13 @@ xosd_create(int number_lines)
   memset(osd, 0, sizeof(xosd));
   if (osd == NULL) {
     xosd_error = "Out of memory";
-    goto error0;
+    free(osd);
   }
 
   DEBUG(Dtrace, "Creating pipe");
   if (pipe(osd->pipefd) == -1) {
     xosd_error = "Error creating pipe";
-    goto error0b;
+    osd = NULL;
   }
 
   DEBUG(Dtrace, "initializing mutex");
@@ -748,7 +748,12 @@ xosd_create(int number_lines)
   osd->lines = malloc(sizeof(union xosd_line) * osd->number_lines);
   if (osd->lines == NULL) {
     xosd_error = "Out of memory";
-    goto error1;
+    pthread_cond_destroy(&osd->cond_sync);
+    pthread_cond_destroy(&osd->cond_wait);
+    pthread_mutex_destroy(&osd->mutex_sync);
+    pthread_mutex_destroy(&osd->mutex);
+    close(osd->pipefd[0]);
+    close(osd->pipefd[1]);
   }
 
   for (i = 0; i < osd->number_lines; i++)
@@ -770,14 +775,14 @@ xosd_create(int number_lines)
   osd->display = XOpenDisplay(display);
   if (!osd->display) {
     xosd_error = "Cannot open display";
-    goto error2;
+    free(osd->lines);
   }
   osd->screen = XDefaultScreen(osd->display);
 
   DEBUG(Dtrace, "x shape extension query");
   if (!XShapeQueryExtension(osd->display, &event_basep, &error_basep)) {
     xosd_error = "X-Server does not support shape extension";
-    goto error3;
+    XCloseDisplay(osd->display);
   }
 
   osd->visual = DefaultVisual(osd->display, osd->screen);
@@ -790,7 +795,7 @@ xosd_create(int number_lines)
      * if we still don't have a fontset, then abort 
      */
     xosd_error = "Default font not found";
-    goto error3;
+    XCloseDisplay(osd->display);
   }
 
   DEBUG(Dtrace, "width and height initialization");
@@ -848,22 +853,6 @@ xosd_create(int number_lines)
   pthread_create(&osd->event_thread, NULL, event_loop, osd);
 
   return osd;
-
-error3:
-  XCloseDisplay(osd->display);
-error2:
-  free(osd->lines);
-error1:
-  pthread_cond_destroy(&osd->cond_sync);
-  pthread_cond_destroy(&osd->cond_wait);
-  pthread_mutex_destroy(&osd->mutex_sync);
-  pthread_mutex_destroy(&osd->mutex);
-  close(osd->pipefd[0]);
-  close(osd->pipefd[1]);
-error0b:
-  free(osd);
-error0:
-  return NULL;
 }
 
 /* }}} */
