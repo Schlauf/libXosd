@@ -145,6 +145,7 @@ struct xosd
 
   int timeout;                  /* CONF delta time */
   struct timeval timeout_start; /* DYN Absolute start of timeout */
+  int nscreens;                 /* number of screens for XOSD object */
 };
 
 static const int XOSD_MAX_PRINTF_BUF_SIZE=2000;
