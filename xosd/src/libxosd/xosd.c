@@ -1091,7 +1091,8 @@ xosd_display(xosd * osd, int line, xosd_command command, ...)
         if (command == XOSD_printf) {
           if (vsnprintf(buf, sizeof(buf), string, a) >= sizeof(buf)) {
             xosd_error = "xosd_display: Buffer too small";
-            goto error;
+            va_end(a);
+            return_value = -1;
           }
           string = buf;
         }
@@ -1122,7 +1123,8 @@ xosd_display(xosd * osd, int line, xosd_command command, ...)
     default:
       {
         xosd_error = "xosd_display: Unknown command";
-        goto error;
+        va_end(a);
+        return_value = -1;
       }
     }
 
@@ -1140,9 +1142,8 @@ xosd_display(xosd * osd, int line, xosd_command command, ...)
     osd->update |= UPD_content | UPD_timer | UPD_show;
     _xosd_unlock(osd);
 
-  error:
-    va_end(a);
   }
+  
   return return_value; 
 }
 
