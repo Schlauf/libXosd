@@ -17,6 +17,8 @@ main(int argc, char *argv[])
   int a;
   osd = xosd_create(2);
   
+  xosd_monitor(osd, 1000);
+  
   if (!osd) {
     printerror();
     return 1;
@@ -134,7 +136,7 @@ main(int argc, char *argv[])
     printerror();
   }
 
-  for (int i = 0; i < screen_count(); i++) {
+  for (int i = 0; i < screen_count(osd); i++) {
  	xosd * osd2 = xosd_clone(osd);
  	xosd_set_timeout(osd2, 10);
   	xosd_monitor(osd2, i+1);

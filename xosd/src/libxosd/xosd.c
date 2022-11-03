@@ -33,10 +33,6 @@ const char *osd_default_colour = "green";
 /** Global error string. */
 char *xosd_error;
 
-/* Number of screens on X11 connection */
-#ifdef HAVE_XINERAMA
-int nscreens;
-#endif
 /* Wait until display is in next state. {{{ */
 static void
 _wait_until_update(xosd * osd, int generation)
@@ -700,6 +696,7 @@ xosd_clone(xosd * osd2)
   osd->screen_height = osd2->screen_height;
   osd->screen_width = osd2->screen_width;
   osd->screen_xpos = osd2->screen_xpos;
+  osd->nscreens = osd2->nscreens;
 
   return osd;
 }
@@ -876,6 +873,7 @@ xosd_monitor(xosd * osd, int monitor)
    int return_value = -1;  
    if (osd != NULL) {     
     #ifdef HAVE_XINERAMA
+      int nscreens;
       XineramaScreenInfo *screeninfo = NULL;
       int dummy_a, dummy_b;
     #endif
@@ -892,6 +890,7 @@ xosd_monitor(xosd * osd, int monitor)
       osd->screen_width = screeninfo[monitor].width;
       osd->screen_height = screeninfo[monitor].height;
       osd->screen_xpos = screeninfo[monitor].x_org;
+      osd->nscreens = nscreens;
       return_value = 0;
       } else
     #endif
@@ -920,6 +919,8 @@ xosd_monitor(xosd * osd, int monitor)
 void* 
 osd_split() 
 {
+  xosd * screen = xosd_create(1);
+  int nscreens = screen->nscreens;
   int return_value = -1;
   char word[256];
   xosd * osd = malloc(sizeof(xosd*)*nscreens*3);
@@ -962,33 +963,40 @@ osd_split()
     for (int i = 0; i < nscreens*3; i++) {
       xosd_destroy(osdptr[i]);    
     }
+    xosd_destroy(screen);
     free(osd);
     free(osdptr);
     return_value = 0;
     pthread_exit(&return_value);
   }
+  xosd_destroy(screen);
   pthread_exit(&return_value);
 }
-
-/* }}} */
 
 /* display_info -- graphically displays screen parameters */
 int 
 display_info()
 {
+  int i = -1;
   pthread_t id;
-  int i = 1;
   pthread_create(&id, NULL, osd_split, &i);
-  return 0;
+  return i;
 }
 
 /* }}} */
 
-/* display_info -- returns the number of screens on the X11 connection which is required for development of extensible programs */
+/* screen_info -- returns the number of back-end screens on the X11 connection */
 int 
-screen_count()
+screen_count(xosd * osd)
 {
-  return nscreens;
+  int return_value;
+  if (osd->nscreens) {
+    return_value = osd->nscreens;
+  }
+  else {
+    return_value = -1;
+  }
+  return return_value;
 }
 
 /* }}} */

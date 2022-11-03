@@ -48,25 +48,64 @@ extern "C"
     XOSD_right
   } xosd_align;
 
-/* xosd_clone -- Create a new xosd "object" with the same attributes as the input xosd "object"*/
+/* xosd_clone -- Create a new xosd object with the same attributes as the input xosd object
+ *
+ * ARGUMENTS
+ *    None.
+ *
+ * RETURNS
+ *    A new xosd structure.
+ */
 xosd *xosd_clone(xosd * osd2);
 
 
 /* xosd_create -- Create a new xosd "object"
  *
  * ARGUMENTS
- *     number_lines   Number of lines of the display.
+ *    number_lines   Number of lines of the display.
  *
  * RETURNS
- *     A new xosd structure.
+ *    A new xosd structure.
  */
  xosd *xosd_create(int number_lines);
 
+
+
+/* xosd_monitor -- Switch an xosd objects default position to a chosen monitor
+ *
+ * ARGUMENTS
+ *    osd             xosd object to modify.
+ *    monitor         monitor the xosd object should be positioned on.
+ *
+ * RETURNS
+ *    0 on success.
+ *   -1 on failure.
+ */
  int xosd_monitor(xosd * osd, int monitor);
  
+ 
+/* display_info -- Displays monitor information using xosd objects, monitor index in the center of
+ * each screen, horizontal resolution in top left and vertical resolution in the top right
+ *
+ * ARGUMENTS
+ *    None.
+ *
+ * RETURNS
+ *    0 on success.
+ *   -1 on failure.
+ */ 
  int display_info();
  
- int screen_count();
+ /* screen_count -- return number of back-end screens on the X11 connection
+ *
+ * ARGUMENTS
+ *    osd             Source X11 connection
+ *
+ * RETURNS
+ *    number of back-end screens on success.
+ *   -1 on failure.
+ */
+ int screen_count(xosd * osd);
 
 /* xosd_init -- Create a new xosd "object" -- deprecated by xosd_create
  *
