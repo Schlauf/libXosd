@@ -206,74 +206,74 @@ draw_text(xosd * osd, int line)
   assert(osd);
   FUNCTION_START(Dfunction);
 
-  if (l->string == NULL)
-    return;
-
-  if (l->width < 0) {
-    XRectangle rect;
-    XmbTextExtents(osd->fontset, l->string, strlen(l->string), NULL, &rect);
-    l->width = rect.width;
-  }
-
-  switch (osd->align) {
-  case XOSD_center:
-    x = (osd->screen_width - l->width) / 2;
-    break;
-  case XOSD_right:
-    x = osd->screen_width - l->width - x;
-  case XOSD_left:
-    break;
-  }
-
-  if (osd->shadow_offset) {
-    XSetForeground(osd->display, osd->gc, osd->shadow_pixel);
-    if (osd->shadow_direction) {
-      switch(osd->shadow_direction) {
-        case 0:
-          _draw_text(osd, l->string, x, y - osd->shadow_offset);
-          break;
-        case 1:
-          _draw_text(osd, l->string, x + osd->shadow_offset, y - osd->shadow_offset);
-          break;
-        case 2:
-          _draw_text(osd, l->string, x + osd->shadow_offset, y);
-          break;
-        case 3:
-          _draw_text(osd, l->string, x + osd->shadow_offset, y + osd->shadow_offset);
-          break;
-        case 4:
-          _draw_text(osd, l->string, x, y + osd->shadow_offset);
-          break;
-        case 5:
-          _draw_text(osd, l->string, x - osd->shadow_offset, y + osd->shadow_offset);
-          break;
-        case 6:
-          _draw_text(osd, l->string, x - osd->shadow_offset, y);
-          break;
-        case 7:
-          _draw_text(osd, l->string, x - osd->shadow_offset, y - osd->shadow_offset);
-          break;
-        default:
-          //_draw_text(osd, l->string, x + osd->shadow_offset, y + osd->shadow_offset);
-          break;
-      }
-    } else {
-      _draw_text(osd, l->string, x +osd->shadow_offset, y + osd->shadow_offset);
+  if (l->string != NULL) {
+    
+    if (l->width < 0) {
+      XRectangle rect;
+      XmbTextExtents(osd->fontset, l->string, strlen(l->string), NULL, &rect);
+      l->width = rect.width;
     }
-  }
-  if (osd->outline_offset) {
-    int i, j;
-    XSetForeground(osd->display, osd->gc, osd->outline_pixel);
-    /* FIXME: echo . | osd_cat -O 50 -p middle -A center */
-    for (i = 1; i <= osd->outline_offset; i++)
-      for (j = 0; j < 9; j++)
-        if (j != 4)
-          _draw_text(osd, l->string, x + (j / 3 - 1) * i,
-                     y + (j % 3 - 1) * i);
-  }
-  if (1) {
-    XSetForeground(osd->display, osd->gc, osd->pixel);
-    _draw_text(osd, l->string, x, y);
+
+    switch (osd->align) {
+    case XOSD_center:
+      x = (osd->screen_width - l->width) / 2;
+      break;
+    case XOSD_right:
+      x = osd->screen_width - l->width - x;
+    case XOSD_left:
+      break;
+    }
+
+    if (osd->shadow_offset) {
+      XSetForeground(osd->display, osd->gc, osd->shadow_pixel);
+      if (osd->shadow_direction) {
+        switch(osd->shadow_direction) {
+          case 0:
+            _draw_text(osd, l->string, x, y - osd->shadow_offset);
+            break;
+          case 1:
+            _draw_text(osd, l->string, x + osd->shadow_offset, y - osd->shadow_offset);
+            break;
+          case 2:
+            _draw_text(osd, l->string, x + osd->shadow_offset, y);
+            break;
+          case 3:
+            _draw_text(osd, l->string, x + osd->shadow_offset, y + osd->shadow_offset);
+            break;
+          case 4:
+            _draw_text(osd, l->string, x, y + osd->shadow_offset);
+            break;
+          case 5:
+            _draw_text(osd, l->string, x - osd->shadow_offset, y + osd->shadow_offset);
+            break;
+          case 6:
+            _draw_text(osd, l->string, x - osd->shadow_offset, y);
+            break;
+          case 7:
+            _draw_text(osd, l->string, x - osd->shadow_offset, y - osd->shadow_offset);
+            break;
+          default:
+            //_draw_text(osd, l->string, x + osd->shadow_offset, y + osd->shadow_offset);
+            break;
+        }
+      } else {
+        _draw_text(osd, l->string, x +osd->shadow_offset, y + osd->shadow_offset);
+      }
+    }
+    if (osd->outline_offset) {
+      int i, j;
+      XSetForeground(osd->display, osd->gc, osd->outline_pixel);
+      /* FIXME: echo . | osd_cat -O 50 -p middle -A center */
+      for (i = 1; i <= osd->outline_offset; i++)
+        for (j = 0; j < 9; j++)
+          if (j != 4)
+            _draw_text(osd, l->string, x + (j / 3 - 1) * i,
+                      y + (j % 3 - 1) * i);
+    }
+    if (1) {
+      XSetForeground(osd->display, osd->gc, osd->pixel);
+      _draw_text(osd, l->string, x, y);
+    }
   }
 }
 
@@ -657,22 +657,21 @@ xosd_init(const char *font, const char *colour, int timeout, xosd_pos pos,
   xosd *osd = xosd_create(number_lines);
 
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return NULL;
-
   if (xosd_set_font(osd, font) == -1) {
     xosd_destroy(osd);
     /*
      * we do not set xosd_error, as set_font has already set it to 
      * a sensible error message. 
      */
-    return NULL;
+    return NULL; 
   }
-  xosd_set_colour(osd, colour);
-  xosd_set_timeout(osd, timeout);
-  xosd_set_pos(osd, pos);
-  xosd_set_vertical_offset(osd, voffset);
-  xosd_set_shadow_offset(osd, shadow_offset);
+  if(osd != NULL) {
+    xosd_set_colour(osd, colour);
+    xosd_set_timeout(osd, timeout);
+    xosd_set_pos(osd, pos);
+    xosd_set_vertical_offset(osd, voffset);
+    xosd_set_shadow_offset(osd, shadow_offset);
+  }
 
   return osd;
 }
@@ -721,7 +720,7 @@ xosd_create(int number_lines)
   display = getenv("DISPLAY");
   if (!display) {
     xosd_error = "No display";
-    return NULL;
+    osd = NULL;
   }
 
   DEBUG(Dtrace, "Mallocing osd");
@@ -875,38 +874,37 @@ int
 xosd_monitor(xosd * osd, int monitor)
 {
 monitor--;
-  if (osd == NULL)
-    return -1;
-    
-  #ifdef HAVE_XINERAMA
-    XineramaScreenInfo *screeninfo = NULL;
-    int dummy_a, dummy_b;
-  #endif
-  FUNCTION_START(Dfunction);
+  if (osd != NULL) {    
+    #ifdef HAVE_XINERAMA
+      XineramaScreenInfo *screeninfo = NULL;
+      int dummy_a, dummy_b;
+    #endif
+    FUNCTION_START(Dfunction);
 
-  _xosd_lock(osd);
+    _xosd_lock(osd);
 
-  #ifdef HAVE_XINERAMA
-    if (XineramaQueryExtension(osd->display, &dummy_a, &dummy_b) &&
-        (screeninfo = XineramaQueryScreens(osd->display, &nscreens)) &&
-       XineramaIsActive(osd->display)) {
-     osd->screen_width = screeninfo[monitor].width;
-     osd->screen_height = screeninfo[monitor].height;
-     osd->screen_xpos = screeninfo[monitor].x_org;
+    #ifdef HAVE_XINERAMA
+      if (XineramaQueryExtension(osd->display, &dummy_a, &dummy_b) &&
+          (screeninfo = XineramaQueryScreens(osd->display, &nscreens)) &&
+        XineramaIsActive(osd->display)) {
+      osd->screen_width = screeninfo[monitor].width;
+      osd->screen_height = screeninfo[monitor].height;
+      osd->screen_xpos = screeninfo[monitor].x_org;
 
-    } else
-  #endif
-  {
-    osd->screen_width = XDisplayWidth(osd->display, osd->screen);
-    osd->screen_height = XDisplayHeight(osd->display, osd->screen);
-    osd->screen_xpos = 0;
+      } else
+    #endif
+    {
+      osd->screen_width = XDisplayWidth(osd->display, osd->screen);
+      osd->screen_height = XDisplayHeight(osd->display, osd->screen);
+      osd->screen_xpos = 0;
+    }
+    #ifdef HAVE_XINERAMA
+      if (screeninfo)
+        XFree(screeninfo);
+    #endif
+    osd->update |= UPD_pos;
+    _xosd_unlock(osd);
   }
-  #ifdef HAVE_XINERAMA
-    if (screeninfo)
-      XFree(screeninfo);
-  #endif
-  osd->update |= UPD_pos;
-  _xosd_unlock(osd);
 
   return 0;
 }
@@ -925,45 +923,45 @@ osd_split()
     osdptr[i] = osd+i;
   }
   osdptr[0] = xosd_create(2);
-  if (osdptr[0] == NULL)
-    return NULL;
- 
-  FUNCTION_START(Dfunction);
+  if (osdptr[0] != NULL) {
 
-  xosd_set_outline_offset(osdptr[0], 1);
-  xosd_set_timeout(osdptr[0], 1);
-  xosd_set_font(osdptr[0], (char *) osd_default_font);
-    
-  for (int i = 0; i < nscreens; i++) {
-    osdptr[3*i] = xosd_clone(osdptr[0]);
-    xosd_monitor(osdptr[3*i], i+1);
-    xosd_set_align(osdptr[3*i], XOSD_center);
-    xosd_set_pos(osdptr[3*i], XOSD_middle);
-    sprintf(word, "%d", i+1);
-    xosd_display(osdptr[3*i], 0, XOSD_string, word);
- 
-    osdptr[3*i+1] = xosd_clone(osdptr[0]);
-    xosd_monitor(osdptr[3*i+1], i+1);
-    xosd_set_align(osdptr[3*i+1], XOSD_left);
-    xosd_set_pos(osdptr[3*i+1], XOSD_top);
-    sprintf(word, "%d", osdptr[i]->screen_width);
-    xosd_display(osdptr[3*i+1], 0, XOSD_string, word);
-    
-    osdptr[3*i+2] = xosd_clone(osdptr[0]);
-    xosd_monitor(osdptr[3*i+2], i+1);
-    xosd_set_align(osdptr[3*i+2], XOSD_right);
-    xosd_set_pos(osdptr[3*i+2], XOSD_top);
-    sprintf(word, "%d", osdptr[3*i+2]->screen_height);
-    xosd_display(osdptr[3*i+2], 0, XOSD_string, word);
-  }
-  sleep(15);
-  for (int i = 0; i < nscreens*3; i++) {
-    xosd_destroy(osdptr[i]);    
-  }
-  free(osd);
-  free(osdptr);
+    FUNCTION_START(Dfunction);
 
-  pthread_exit(&i);
+    xosd_set_outline_offset(osdptr[0], 1);
+    xosd_set_timeout(osdptr[0], 1);
+    xosd_set_font(osdptr[0], (char *) osd_default_font);
+      
+    for (int i = 0; i < nscreens; i++) {
+      osdptr[3*i] = xosd_clone(osdptr[0]);
+      xosd_monitor(osdptr[3*i], i+1);
+      xosd_set_align(osdptr[3*i], XOSD_center);
+      xosd_set_pos(osdptr[3*i], XOSD_middle);
+      sprintf(word, "%d", i+1);
+      xosd_display(osdptr[3*i], 0, XOSD_string, word);
+  
+      osdptr[3*i+1] = xosd_clone(osdptr[0]);
+      xosd_monitor(osdptr[3*i+1], i+1);
+      xosd_set_align(osdptr[3*i+1], XOSD_left);
+      xosd_set_pos(osdptr[3*i+1], XOSD_top);
+      sprintf(word, "%d", osdptr[i]->screen_width);
+      xosd_display(osdptr[3*i+1], 0, XOSD_string, word);
+      
+      osdptr[3*i+2] = xosd_clone(osdptr[0]);
+      xosd_monitor(osdptr[3*i+2], i+1);
+      xosd_set_align(osdptr[3*i+2], XOSD_right);
+      xosd_set_pos(osdptr[3*i+2], XOSD_top);
+      sprintf(word, "%d", osdptr[3*i+2]->screen_height);
+      xosd_display(osdptr[3*i+2], 0, XOSD_string, word);
+    }
+    sleep(15);
+    for (int i = 0; i < nscreens*3; i++) {
+      xosd_destroy(osdptr[i]);    
+    }
+    free(osd);
+    free(osdptr);
+
+    pthread_exit(&i);
+  }
 }
 
 /* }}} */
@@ -1007,46 +1005,46 @@ xosd_destroy(xosd * osd)
   int i;
 
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  if (osd != NULL) {
 
-  DEBUG(Dtrace, "waiting for threads to exit");
-  _xosd_lock(osd);
-  osd->done = 1;
-  _xosd_unlock(osd);
+    DEBUG(Dtrace, "waiting for threads to exit");
+    _xosd_lock(osd);
+    osd->done = 1;
+    _xosd_unlock(osd);
 
-  DEBUG(Dtrace, "join threads");
-  pthread_join(osd->event_thread, NULL);
+    DEBUG(Dtrace, "join threads");
+    pthread_join(osd->event_thread, NULL);
 
-  DEBUG(Dtrace, "freeing X resources");
-  XFreeGC(osd->display, osd->gc);
-  XFreeGC(osd->display, osd->mask_gc);
-  XFreeGC(osd->display, osd->mask_gc_back);
-  XFreePixmap(osd->display, osd->line_bitmap);
-  XFreeFontSet(osd->display, osd->fontset);
-  XFreePixmap(osd->display, osd->mask_bitmap);
-  XDestroyWindow(osd->display, osd->window);
+    DEBUG(Dtrace, "freeing X resources");
+    XFreeGC(osd->display, osd->gc);
+    XFreeGC(osd->display, osd->mask_gc);
+    XFreeGC(osd->display, osd->mask_gc_back);
+    XFreePixmap(osd->display, osd->line_bitmap);
+    XFreeFontSet(osd->display, osd->fontset);
+    XFreePixmap(osd->display, osd->mask_bitmap);
+    XDestroyWindow(osd->display, osd->window);
 
-  XCloseDisplay(osd->display);
+    XCloseDisplay(osd->display);
 
-  DEBUG(Dtrace, "freeing lines");
-  for (i = 0; i < osd->number_lines; i++)
-    if (osd->lines[i].type == LINE_text && osd->lines[i].text.string)
-      free(osd->lines[i].text.string);
-  free(osd->lines);
+    DEBUG(Dtrace, "freeing lines");
+    for (i = 0; i < osd->number_lines; i++)
+      if (osd->lines[i].type == LINE_text && osd->lines[i].text.string)
+        free(osd->lines[i].text.string);
+    free(osd->lines);
 
-  DEBUG(Dtrace, "destroying condition and mutex");
-  pthread_cond_destroy(&osd->cond_sync);
-  pthread_cond_destroy(&osd->cond_wait);
-  pthread_mutex_destroy(&osd->mutex_sync);
-  pthread_mutex_destroy(&osd->mutex);
-  close(osd->pipefd[0]);
-  close(osd->pipefd[1]);
+    DEBUG(Dtrace, "destroying condition and mutex");
+    pthread_cond_destroy(&osd->cond_sync);
+    pthread_cond_destroy(&osd->cond_wait);
+    pthread_mutex_destroy(&osd->mutex_sync);
+    pthread_mutex_destroy(&osd->mutex);
+    close(osd->pipefd[0]);
+    close(osd->pipefd[1]);
 
-  DEBUG(Dtrace, "freeing osd structure");
-  free(osd);
+    DEBUG(Dtrace, "freeing osd structure");
+    free(osd);
 
-  FUNCTION_END(Dfunction);
+    FUNCTION_END(Dfunction);
+  }
   return 0;
 }
 
@@ -1057,17 +1055,13 @@ int
 xosd_set_bar_length(xosd * osd, int length)
 {
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
-
-  if (length == 0)
-    return -1;
-  if (length < -1)
-    return -1;
-
-  osd->bar_length = length;
-
-  return 0;
+  int return_val = -1;
+  if (osd != NULL && length != 0 && length > 0) {
+    osd->bar_length = length;
+    return_val = 0;
+  } 
+  return return_val;
+  
 }
 
 /* }}} */
@@ -1077,81 +1071,75 @@ int
 xosd_display(xosd * osd, int line, xosd_command command, ...)
 {
   int ret = -1;
-union xosd_line newline = { type:LINE_blank };
+  union xosd_line newline = { type:LINE_blank };
   va_list a;
 
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
-
-  if (line < 0 || line >= osd->number_lines) {
-    xosd_error = "xosd_display: Invalid Line Number";
-    return -1;
-  }
-
-  va_start(a, command);
-  switch (command) {
-  case XOSD_string:
-  case XOSD_printf:
-    {
-      char buf[XOSD_MAX_PRINTF_BUF_SIZE];
-      struct xosd_text *l = &newline.text;
-      char *string = va_arg(a, char *);
-      if (command == XOSD_printf) {
-        if (vsnprintf(buf, sizeof(buf), string, a) >= sizeof(buf)) {
-          xosd_error = "xosd_display: Buffer too small";
-          goto error;
+  if (osd != NULL && (line >= 0 && line < osd->number_lines)) {
+    va_start(a, command);
+    switch (command) {
+    case XOSD_string:
+    case XOSD_printf:
+      {
+        char buf[XOSD_MAX_PRINTF_BUF_SIZE];
+        struct xosd_text *l = &newline.text;
+        char *string = va_arg(a, char *);
+        if (command == XOSD_printf) {
+          if (vsnprintf(buf, sizeof(buf), string, a) >= sizeof(buf)) {
+            xosd_error = "xosd_display: Buffer too small";
+            goto error;
+          }
+          string = buf;
         }
-        string = buf;
+        if (string && *string) {
+          ret = strlen(string);
+          l->type = LINE_text;
+          l->string = malloc(ret + 1);
+          memcpy(l->string, string, ret + 1);
+        } else {
+          ret = 0;
+          l->type = LINE_blank;
+        }
+        l->width = -1;
+        break;
       }
-      if (string && *string) {
-        ret = strlen(string);
-        l->type = LINE_text;
-        l->string = malloc(ret + 1);
-        memcpy(l->string, string, ret + 1);
-      } else {
-        ret = 0;
-        l->type = LINE_blank;
+
+    case XOSD_percentage:
+    case XOSD_slider:
+      {
+        struct xosd_bar *l = &newline.bar;
+        ret = va_arg(a, int);
+        ret = (ret < 0) ? 0 : (ret > 100) ? 100 : ret;
+        l->type = (command == XOSD_percentage) ? LINE_percentage : LINE_slider;
+        l->value = ret;
+        break;
       }
-      l->width = -1;
+
+    default:
+      {
+        xosd_error = "xosd_display: Unknown command";
+        goto error;
+      }
+    }
+
+    _xosd_lock(osd);
+    /* Free old entry */
+    switch (osd->lines[line].type) {
+    case LINE_text:
+      free(osd->lines[line].text.string);
+    case LINE_blank:
+    case LINE_percentage:
+    case LINE_slider:
       break;
     }
+    osd->lines[line] = newline;
+    osd->update |= UPD_content | UPD_timer | UPD_show;
+    _xosd_unlock(osd);
 
-  case XOSD_percentage:
-  case XOSD_slider:
-    {
-      struct xosd_bar *l = &newline.bar;
-      ret = va_arg(a, int);
-      ret = (ret < 0) ? 0 : (ret > 100) ? 100 : ret;
-      l->type = (command == XOSD_percentage) ? LINE_percentage : LINE_slider;
-      l->value = ret;
-      break;
-    }
-
-  default:
-    {
-      xosd_error = "xosd_display: Unknown command";
-      goto error;
-    }
+  error:
+    va_end(a);
+    return ret;
   }
-
-  _xosd_lock(osd);
-  /* Free old entry */
-  switch (osd->lines[line].type) {
-  case LINE_text:
-    free(osd->lines[line].text.string);
-  case LINE_blank:
-  case LINE_percentage:
-  case LINE_slider:
-    break;
-  }
-  osd->lines[line] = newline;
-  osd->update |= UPD_content | UPD_timer | UPD_show;
-  _xosd_unlock(osd);
-
-error:
-  va_end(a);
-  return ret;
 }
 
 /* }}} */
@@ -1161,9 +1149,12 @@ int
 xosd_is_onscreen(xosd * osd)
 {
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
-  return osd->generation & 1;
+  int return_val = -1;
+  if (osd != NULL) {
+    return_val = osd->generation & 1;
+  }
+
+  return return_val;
 }
 
 /* }}} */
@@ -1173,15 +1164,16 @@ int
 xosd_wait_until_no_display(xosd * osd)
 {
   int generation;
+  int return_val = -1;
   FUNCTION_START(Dfunction);
-  if (osd == NULL)
-    return -1;
+  if (osd != NULL) {
+    return_val = 0;
+    if ((generation = osd->generation) & 1)
+      _wait_until_update(osd, generation);
 
-  if ((generation = osd->generation) & 1)
-    _wait_until_update(osd, generation);
-
-  FUNCTION_END(Dfunction);
-  return 0;
+    FUNCTION_END(Dfunction);
+  }
+  return return_val;
 }
 
 /* }}} */
