@@ -873,12 +873,14 @@ error0:
 int 
 xosd_monitor(xosd * osd, int monitor)
 {
-monitor--;
-  if (osd != NULL) {    
+   int return_value = -1;  
+   if (osd != NULL) {     
     #ifdef HAVE_XINERAMA
       XineramaScreenInfo *screeninfo = NULL;
       int dummy_a, dummy_b;
     #endif
+    monitor--;
+
     FUNCTION_START(Dfunction);
 
     _xosd_lock(osd);
@@ -886,27 +888,30 @@ monitor--;
     #ifdef HAVE_XINERAMA
       if (XineramaQueryExtension(osd->display, &dummy_a, &dummy_b) &&
           (screeninfo = XineramaQueryScreens(osd->display, &nscreens)) &&
-        XineramaIsActive(osd->display)) {
+        XineramaIsActive(osd->display) && (nscreens > monitor) && (monitor >= 0)) {
       osd->screen_width = screeninfo[monitor].width;
       osd->screen_height = screeninfo[monitor].height;
       osd->screen_xpos = screeninfo[monitor].x_org;
-
+      return_value = 0;
       } else
     #endif
     {
       osd->screen_width = XDisplayWidth(osd->display, osd->screen);
       osd->screen_height = XDisplayHeight(osd->display, osd->screen);
       osd->screen_xpos = 0;
+      xosd_error = "Error getting screen info from Xinerama";
+      return_value = -1;
+
     }
     #ifdef HAVE_XINERAMA
-      if (screeninfo)
+      if (screeninfo) {
         XFree(screeninfo);
+      }
     #endif
     osd->update |= UPD_pos;
     _xosd_unlock(osd);
   }
-
-  return 0;
+  return return_value;
 }
 
 /* }}} */
@@ -915,7 +920,7 @@ monitor--;
 void* 
 osd_split() 
 {
-  int i = 1;
+  int return_value = -1;
   char word[256];
   xosd * osd = malloc(sizeof(xosd*)*nscreens*3);
   xosd ** osdptr = malloc(sizeof(xosd)*nscreens*3);
@@ -959,9 +964,10 @@ osd_split()
     }
     free(osd);
     free(osdptr);
-
-    pthread_exit(&i);
+    return_value = 0;
+    pthread_exit(&return_value);
   }
+  pthread_exit(&return_value);
 }
 
 /* }}} */
@@ -973,7 +979,7 @@ display_info()
   pthread_t id;
   int i = 1;
   pthread_create(&id, NULL, osd_split, &i);
-  return 1;
+  return 0;
 }
 
 /* }}} */
@@ -1003,7 +1009,6 @@ int
 xosd_destroy(xosd * osd)
 {
   int i;
-
   FUNCTION_START(Dfunction);
   if (osd != NULL) {
 
@@ -1070,7 +1075,7 @@ xosd_set_bar_length(xosd * osd, int length)
 int
 xosd_display(xosd * osd, int line, xosd_command command, ...)
 {
-  int ret = -1;
+  int return_value = -1;
   union xosd_line newline = { type:LINE_blank };
   va_list a;
 
@@ -1092,12 +1097,12 @@ xosd_display(xosd * osd, int line, xosd_command command, ...)
           string = buf;
         }
         if (string && *string) {
-          ret = strlen(string);
+          return_value = strlen(string);
           l->type = LINE_text;
-          l->string = malloc(ret + 1);
-          memcpy(l->string, string, ret + 1);
+          l->string = malloc(return_value + 1);
+          memcpy(l->string, string, return_value + 1);
         } else {
-          ret = 0;
+          return_value = 0;
           l->type = LINE_blank;
         }
         l->width = -1;
@@ -1108,10 +1113,10 @@ xosd_display(xosd * osd, int line, xosd_command command, ...)
     case XOSD_slider:
       {
         struct xosd_bar *l = &newline.bar;
-        ret = va_arg(a, int);
-        ret = (ret < 0) ? 0 : (ret > 100) ? 100 : ret;
+        return_value = va_arg(a, int);
+        return_value = (return_value < 0) ? 0 : (return_value > 100) ? 100 : return_value;
         l->type = (command == XOSD_percentage) ? LINE_percentage : LINE_slider;
-        l->value = ret;
+        l->value = return_value;
         break;
       }
 
@@ -1138,8 +1143,8 @@ xosd_display(xosd * osd, int line, xosd_command command, ...)
 
   error:
     va_end(a);
-    return ret;
   }
+  return return_value; 
 }
 
 /* }}} */
