@@ -1,14 +1,14 @@
 .\" Manpage for display_info.
 .TH display_info "2022-10-27" "X OSD Library"
 .SH NAME
-display_info \- gives information about the current display
+display_info \- displays information about the current display using the libxosd library
 .SH SYNOPSIS
 int display_info()
 .SH DESCRIPTION
-display_info generates the information that is placed onto the display
+display_info retieves the specifications of the screens on the X11 connection and displays them on screen
 .SH ARGUMENTS
 Takes no arguments
 .SH RETURN VALUE
-returns 1 on success
+returns 0 on success, -1 otherwise
 .SH AUTHOR
 libXosd team at Western Washington University
