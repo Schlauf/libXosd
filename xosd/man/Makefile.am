@@ -5,7 +5,7 @@ man_MANS = osd_cat.1  xosd-config.1\
   xosd_get_number_lines.3 xosd_set_align.3 xosd_create.3 \
   xosd_set_horizontal_offset.3 xosd_destroy.3 xosd_create.3 xosd_is_onscreen.3 \
   xosd_set_bar_length.3 xosd_monitor.3 xosd_clone.3 display_info.3 \
-  osd_split.3 screen_count.3 \
+  screen_count.3 \
   
 
 EXTRA_DIST = ${man_MANS}

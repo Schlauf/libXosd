@@ -1,14 +1,14 @@
 .\" Manpage for screen_count.
-.TH screen_count "2022-10-27" "X OSD Library"
+.TH screen_count "2022-11-04" "X OSD Library"
 .SH NAME
-screen_count \- gives number of screens
+screen_count \- gives number of back-end screens
 .SH SYNOPSIS
-int screen_count(xosd *osd)
+int screen_count(xosd * osd)
 .SH DESCRIPTION
 screen_count gives an integer representing the current number of screen displays
 .SH ARGUMENTS
-Takes xosd *osd as an argument, representing an XOSD object/on screen display window
+Takes xosd * osd as an argument, representing the X11 connection
 .SH RETURN VALUE
-Returns nscreens, which is the number of screen displays
+Returns nscreens, which is the number of back-end screens i.e. physical monitors or analogues
 .SH AUTHOR
 libXosd team at Western Washington University
