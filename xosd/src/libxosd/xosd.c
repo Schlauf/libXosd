@@ -683,26 +683,26 @@ xosd_clone(xosd * osd2)
   xosd *osd = xosd_create(osd2->number_lines);
   osd->align = osd2->align;
   osd->bar_length = osd2->bar_length;
-  osd->colour = osd2->colour;
-
+  osd->shadow_colour = osd2->shadow_colour;
+  osd->shadow_pixel = osd2->shadow_pixel;
 /* Copying original lines to the cloned xosd instance causes unintuitive behaviour
   osd->lines = osd2->lines; */
   osd->pos = osd2->pos;
   osd->hoffset = osd2->hoffset;
   osd->voffset = osd2->voffset;
+  osd->colour = osd2->colour;
+  osd->pixel = osd2->pixel;
+  osd->outline_colour = osd2->outline_colour;
+  osd->outline_pixel = osd2->outline_pixel;
   osd->shadow_offset = osd2->shadow_offset;
   osd->shadow_direction = osd2->shadow_direction;
-  osd->shadow_colour = osd2->shadow_colour;
-  osd->outline_colour = osd2->outline_colour;
   osd->outline_offset = osd2->outline_offset;
   osd->screen_height = osd2->screen_height;
   osd->screen_width = osd2->screen_width;
   osd->screen_xpos = osd2->screen_xpos;
   osd->nscreens = osd2->nscreens;
-
   return osd;
 }
-
 
 /* xosd_create -- Create a new xosd "object" {{{ */
 xosd *
