@@ -42,7 +42,19 @@ xosd - X on-screen display library
 .sp
 .BI "int xosd_scroll (xosd* "osd ", int " lines );
 .sp
-.BI "int xosd_get_number_lines ( xosd* "osd "); "
+.BI "int xosd_get_number_lines (xosd* "osd "); 
+.sp
+.BI "void* osd_split();"
+.sp
+.BI "int screen_count(xosd *" osd "); 
+.sp
+.BI "xosd* xosd_clone(xosd *" osd2 "); 
+.sp 
+.BI "int xosd_monitor(xosd *" osd ", int " monitor "); 
+.sp 
+.BI "int xosd_set_shadow_direction(xosd *" osd ", int " shadow_direction ");
+.sp
+.BI "int display_info();
 .fi
 
 .SH DESCRIPTION
