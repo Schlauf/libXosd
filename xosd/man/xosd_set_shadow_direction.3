@@ -1,17 +1,22 @@
 .\" Manpage for xosd_set_shadow_direction.
 .TH xosd_set_shadow_direction "2022-10-27" "X OSD Library"
 .SH NAME
-xosd_set_shadow_direction \- change shadow direction
+xosd_set_shadow_direction \- Set the direction of the shadow of the XODS window
 .SH SYNOPSIS
+.B #include <xosd.h>
+.sp
+.BI "int xosd_set_pos (xosd* " osd ", shadow_direction 
 int xosd_set_shadow_direction(xosd *osd, int shadow_direction)
 .SH DESCRIPTION
-xosd_set_shadow direction changes the direction of the shadow on the osd object and overall display
+.B xosd_set_shadow_direction
+changes the direction of the XOSD shadow from 0 to 7, 0 being upwards and rotating clockwise. The default direction is 3.
 .SH ARGUMENTS
 .IP \fIosd\fP 1i
-the display object to alter
+The on-screen display object ot act on.
 .IP \fIshadow_direction\fP 1i
-integer value representing direction of shadow; should be between 1 and 7 exclusive
+Integer value from 0 to 7.
 .SH RETURN VALUE
-returns 0 on success, -1 otherwise
-.SH AUTHOR
-libXosd team at Western Washington University
+On a success, a zero is returned.
+On error, \-1 is returned.
+.SH "SEE ALSO"
+.BR xosd_set_shadow_offset (3xosd)

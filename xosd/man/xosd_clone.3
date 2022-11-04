@@ -1,15 +1,20 @@
 .\" Manpage for xosd_clone
 .TH xosd_clone "2022-10-27" "X OSD Library"
 .SH NAME
-xosd_clone \- creates a duplicate xosd object
+xosd_clone \- Duplicates an XOSD object with the same attributes
 .SH SYNOPSIS
-xosd* xosd_clone(xosd *osd2)
+.B #include <xosd.h>
+.sp
+.BI "xosd* xosd_clone(xosd *osd2);
+.fi
 .SH DESCRIPTION
-xosd_clone creates a new xosd object with the same attributes as current xosd object
+.B xosd_clone 
+creates a new unique xosd object with the same attributes as the original xosd object.
+
 .SH ARGUMENTS
 .IP \fIosd2\fP 1i
-The xosd object to duplicate
+The on-screen display object to duplicate.
 .SH RETURN VALUE
-Returns the duplicated xosd object
+On success, returns a new xosd object.
 .SH AUTHOR
 libXosd team at Western Washington University
