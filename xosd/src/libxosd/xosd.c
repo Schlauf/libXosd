@@ -906,9 +906,9 @@ xosd_monitor(xosd * osd, int monitor)
 
 /* }}} */
 
-/* osd_split -- main for pthreads in display_info */
+/* display_info_driver -- main for pthreads in display_info */
 void* 
-osd_split() 
+display_info_driver() 
 {
   xosd * screen = xosd_create(1);
   int nscreens = screen->nscreens;
@@ -970,7 +970,7 @@ display_info()
 {
   int i = -1;
   pthread_t id;
-  pthread_create(&id, NULL, osd_split, &i);
+  pthread_create(&id, NULL, display_info_driver, &i);
   return i;
 }
 
