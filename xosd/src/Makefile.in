@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 
-SOURCES = $(osd_cat_SOURCES) $(testprog_SOURCES)
+SOURCES = $(osd_cat_SOURCES) $(testprog_SOURCES) $(display_info_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -39,7 +39,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = osd_cat$(EXEEXT)
+bin_PROGRAMS = osd_cat$(EXEEXT) display_info$(EXEEXT)
 noinst_PROGRAMS = testprog$(EXEEXT)
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
@@ -56,6 +56,9 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_osd_cat_OBJECTS = osd_cat.$(OBJEXT)
 osd_cat_OBJECTS = $(am_osd_cat_OBJECTS)
 osd_cat_DEPENDENCIES = libxosd/libxosd.la
+am_display_info_OBJECTS = display_info.$(OBJEXT)
+display_info_OBJECTS = $(am_display_info_OBJECTS)
+display_info_DEPENDENCIES = libxosd/libxosd.la
 am_testprog_OBJECTS = testprog.$(OBJEXT)
 testprog_OBJECTS = $(am_testprog_OBJECTS)
 testprog_DEPENDENCIES = libxosd/libxosd.la
@@ -70,8 +73,8 @@ LTCOMPILE = $(LIBTOOL) --mode=compile --tag=CC $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link --tag=CC $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(osd_cat_SOURCES) $(testprog_SOURCES)
-DIST_SOURCES = $(osd_cat_SOURCES) $(testprog_SOURCES)
+SOURCES = $(osd_cat_SOURCES) $(testprog_SOURCES) $(dispay_info_SOURCES)
+DIST_SOURCES = $(osd_cat_SOURCES) $(testprog_SOURCES) $(display_info_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -227,8 +230,10 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 osd_cat_SOURCES = osd_cat.c
 testprog_SOURCES = testprog.c
+display_info_SOURCES = display_info.c
 osd_cat_LDADD = libxosd/libxosd.la
 testprog_LDADD = libxosd/libxosd.la
+display_info_LDADD = libxosd/libxosd.la
 include_HEADERS = xosd.h
 AM_CFLAGS = ${GTK_CFLAGS}
 SUBDIRS = libxosd xmms_plugin bmp_plugin
@@ -306,6 +311,9 @@ osd_cat$(EXEEXT): $(osd_cat_OBJECTS) $(osd_cat_DEPENDENCIES)
 testprog$(EXEEXT): $(testprog_OBJECTS) $(testprog_DEPENDENCIES) 
 	@rm -f testprog$(EXEEXT)
 	$(LINK) $(testprog_LDFLAGS) $(testprog_OBJECTS) $(testprog_LDADD) $(LIBS)
+display_info$(EXEEXT): $(display_info_OBJECTS) $(display_info_DEPENDENCIES)
+	@rm -f display_info$(EXEEXT)
+	$(LINK) $(display_info_LDFLAGS) $(display_info_OBJECTS) $(display_info_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -315,6 +323,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/osd_cat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testprog.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/display_info.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
