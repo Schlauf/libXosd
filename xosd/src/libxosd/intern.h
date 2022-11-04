@@ -91,6 +91,7 @@ struct xosd
 
   Display *display;             /* CONST x11 */
   int screen;                   /* CONST x11 */
+  int nscreens;                 /* Number of back-end screens on the X11 connection */
   Window window;                /* CONST x11 */
   unsigned int depth;           /* CONST x11 */
   Pixmap mask_bitmap;           /* CACHE (font,offset) XShape mask */
@@ -145,7 +146,7 @@ struct xosd
 
   int timeout;                  /* CONF delta time */
   struct timeval timeout_start; /* DYN Absolute start of timeout */
-  int nscreens;                 /* number of screens for XOSD object */
+
 };
 
 static const int XOSD_MAX_PRINTF_BUF_SIZE=2000;
