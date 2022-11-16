@@ -130,6 +130,9 @@ xosd *xosd_clone(xosd * osd2);
                                int shadow_offset, int number_lines);
 
 /* xosd_destroy -- Destroy a xosd "object"
+ * 
+ * Not intended to be used on its own, acts as a helper
+ * method for the display_info tool
  *
  * ARGUMENTS
  *     osd  The xosd "object" to destroy.
@@ -195,6 +198,9 @@ xosd *xosd_clone(xosd * osd2);
   int xosd_is_onscreen(xosd * osd);
 
 /* xosd_wait_until_no_display -- Wait until nothing is displayed
+ * 
+ * Not intended to be used on its own, acts as a helper
+ * method for the display_info tool
  *
  * ARGUMENTS
  *     osd      The xosd "object".
@@ -291,6 +297,9 @@ xosd *xosd_clone(xosd * osd2);
 
 /* xosd_set_outline_colour -- Change the colour of the outline
  *
+ * Not intended to be used on its own, acts as a helper
+ * method for the display_info tool
+ *
  * ARGUMENTS
  *     osd      The xosd "object".
  *     colour   The new colour of the display.  (See "rgb.txt" in the
@@ -345,6 +354,9 @@ xosd *xosd_clone(xosd * osd2);
 
 /* xosd_set_timeout -- Change the time before display is hidden.
  *
+ * Not intended to be used on its own, acts as a helper
+ * method for the display_info tool
+ *
  * ARGUMENTS
  *     osd      The xosd "object".
  *     timeout  The number of seconds before the display is hidden.
@@ -369,6 +381,9 @@ xosd *xosd_clone(xosd * osd2);
   int xosd_set_colour(xosd * osd, const char *colour);
 
 /* xosd_set_font -- Change the text-display font
+ *
+ * Not intended to be used on its own, acts as a helper
+ * method for the display_info tool
  *
  * ARGUMENTS
  *     osd      The xosd "object".

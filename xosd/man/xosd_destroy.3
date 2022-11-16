@@ -35,6 +35,8 @@ int\ \fBxosd_destroy\fR\ (xosd\ *\fIosd\fR);
 
 .PP
 \fBxosd_destroy\fR destroys an XOSD object freeing up any memory used. The \fIosd\fR object must have been created by \fBxosd_create\fR(3xosd).
+.PP
+\fBxosd_destroy\fR is not intended to be used on its own, but functions as a helper within the display_info tool.
 
 .SH "ARGUMENTS"
 
@@ -61,7 +63,7 @@ The \fBxosd_destroy\fR function first appeared in version 2.0 of the XOSD librar
 .SH "AUTHORS"
 
 .PP
-The XOSD library was originally written by André Renaud, and is currenly maintained by Tim Wright. This document was written by Michael JasonSmith.
+The XOSD library was originally written by Andrï¿½ Renaud, and is currenly maintained by Tim Wright. This document was written by Michael JasonSmith.
 
 .SH "BUGS"
 
